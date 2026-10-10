@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Washington Junior School - Management Portal</title>
+  <style>
+    :root { --primary: #003366; --secondary: #f4f6f9; --accent: #28a745; --dark: #222; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: var(--secondary); color: var(--dark); }
+    
+    header { background: var(--primary); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+    .contact-info { font-size: 0.85rem; color: #d0e1f9; margin-top: 5px; }
+    .auth-btn { background: #dc3545; color: white; font-weight: bold; border: none; padding: 8px 16px; cursor: pointer; border-radius: 4px; }
+    .auth-btn:hover { background: #bd2130; }
+
+    .container { padding: 20px; max-width: 1200px; margin: auto; }
+    
+    .tab-bar { display: flex; gap: 10px; border-bottom: 2px solid #ccc; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab-btn { background: none; border: none; padding: 10px 15px; font-weight: bold; cursor: pointer; color: #555; }
+    .tab-btn.active { border-bottom: 3px solid var(--primary); color: var(--primary); }
+    
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .card h3 { margin-top: 0; color: #333; font-size: 1.1rem; }
+    .card p { font-size: 1.4rem; font-weight: bold; margin: 5px 0 0; color: var(--primary); }
+    
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; margin-top: 10px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background: #e9ecef; }
+    
+    .portal-section, .sub-tab-content { display: none; }
+    .portal-section.active, .sub-tab-content.active { display: block; }
+    
+    form { display: grid; gap: 10px; max-width: 700px; }
+    input, select, textarea { padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
+    .btn { background: var(--primary); color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    .btn:hover { background: #002244; }
+    .btn-danger { background: #dc3545; }
+    .btn-danger:hover { background: #bd2130; }
+    .btn-print { background: #17a2b8; }
+    .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; color: white; }
+    .bg-green { background: #28a745; }
+    .bg-red { background: #dc3545; }
+
+    .passport-preview { width: 100px; height: 100px; object-fit: cover; border-radius: 6px; border: 2px solid var(--primary); background: #eee; }
+
+    /* Modal Styles */
+    .modal-overlay { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 1000; }
+    .modal { background: white; padding: 30px; border-radius: 8px; max-width: 450px; width: 90%; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .modal h3 { margin-top: 0; color: var(--primary); text-align: center; font-size: 1.5rem; }
+    .user-banner { background: #e0f0ff; border-left: 4px solid var(--primary); padding: 12px 15px; margin-bottom: 15px; font-size: 0.95rem; border-radius: 4px; }
+    
+    .rollcall-status-btn { padding: 6px 12px; margin-right: 5px; border: 1px solid #ccc; background: #f8f9fa; cursor: pointer; border-radius: 4px; }
+    .rollcall-status-btn.selected-present { background: #28a745; color: white; border-color: #28a745; }
+    .rollcall-status-btn.selected-absent { background: #dc3545; color: white; border-color: #dc3545; }
+    .rollcall-status-btn.selected-late { background: #ffc107; color: #222; border-color: #ffc107; }
+
+    /* Nursery Custom Design */
+    .nursery-theme { border-top: 5px solid #ff6f61; }
+    .nursery-card { background: #fffaf0; border: 1px solid #ffe4b5; }
+
+    /* Printable Area Styling */
+    #printable-area { display: none; background: white; padding: 30px; border: 1px solid #ddd; }
+    .print-header { text-align: center; border-bottom: 2px solid #003366; padding-bottom: 10px; margin-bottom: 20px; }
+    .print-header h1 { margin: 0; color: #003366; font-size: 1.8rem; }
+    .print-header p { margin: 3px 0; font-size: 0.9rem; color: #555; }
+
+    @media print {
+      header, .tab-bar, .btn, form, .user-banner, .modal-overlay, .portal-section { display: none !important; }
+      body { background: white; color: black; margin: 0; }
+      .container { max-width: 100%; padding: 0; }
+      #printable-area { display: block !important; border: none; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= HEADER ================= -->
+  <header>
+    <div>
+      <h2 style="margin: 0;">Washington Junior School</h2>
+      <div class="contact-info">
+        whatsapp/phone number +256743455636 | email – washingtonjuniorschool@gmail.com | location Nkokonjeru Town Council[cite: 1]
+      </div>
+    </div>
+    <div id="logout-container" style="display: none;">
+      <button class="auth-btn" onclick="handleLogout()">Sign Out</button>
+    </div>
+  </header>
+
+  <!-- ================= MANDATORY LOGIN MODAL ================= -->
+  <div id="login-modal" class="modal-overlay">
+    <div class="modal">
+      <h3>Sign In to School Portal</h3>
+      <p style="text-align: center; color: #666; font-size: 0.9rem; margin-bottom: 20px;">Please select your role and enter credentials to access your portal.</p>
+      <form id="auth-form" onsubmit="handleAuthSubmit(event)">
+        <label><strong>Select Your Portal Role:</strong></label>
+        <select id="auth-role" onchange="toggleAuthFields()" required>
+          <option value="Secretary">School Secretary / Admin</option>
+          <option value="Teacher">Primary Teacher Portal</option>
+          <option value="NurseryTeacher">Nursery Teacher Portal</option>
+          <option value="Student">Student / Parent Portal</option>
+        </select>
+
+        <div id="student-auth-fields" style="display: none;">
+          <label><strong>Type Full Student Name:</strong></label>
+          <input type="text" id="auth-student-name" placeholder="Enter Registered Full Name">
+          
+          <label><strong>Select Student Class:</strong></label>
+          <select id="auth-student-class">
+            <option value="">-- Select Class --</option>
+            <option value="Baby">Canary (Baby)</option>[cite: 1]
+            <option value="Middle">Dove (Middle)</option>[cite: 1]
+            <option value="Top">Ruby (Top)</option>[cite: 1]
+            <option value="P.1">Penguin (P.1)</option>[cite: 1]
+            <option value="P.2">Daisy (P.2)</option>[cite: 1]
+            <option value="P.3">Parrot (P.3)</option>[cite: 1]
+            <option value="P.4">Sparrow (P.4)</option>[cite: 1]
+            <option value="P.5">Peacock (P.5)</option>[cite: 1]
+            <option value="P.6">Crow (P.6)</option>[cite: 1]
+            <option value="P.7">Eagle (P.7)</option>[cite: 1]
+          </select>
+
+          <label><strong>Student Secret Password / PIN:</strong></label>
+          <input type="password" id="auth-student-pass" placeholder="Enter Your Student Password">
+        </div>
+
+        <div id="staff-auth-fields">
+          <label><strong>Username / Access ID:</strong></label>
+          <input type="text" id="auth-staff-id" placeholder="Enter Username" required>
+          <label><strong>Password:</strong></label>
+          <input type="password" id="auth-pass" placeholder="Enter Password" required>
+        </div>
+
+        <button type="submit" class="btn" style="margin-top: 15px; padding: 12px; font-size: 1rem;">Sign In to Portal</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <div id="user-banner" class="user-banner" style="display: none;">
+      <strong>Current Active Session:</strong> <span id="current-user-info">Not Logged In</span>
+    </div>
+
+    <!-- ================= STUDENT / PARENT PORTAL ================= -->
+    <div id="student-portal" class="portal-section">
+      <h2>Student & Parent Portal</h2>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchSubTab('stu-overview', this)">Overview & Profile</button>
+        <button class="tab-btn" onclick="switchSubTab('stu-behavior', this)">Behavior Record</button>
+        <button class="tab-btn" onclick="switchSubTab('stu-fees', this)">Fees & Balances</button>
+        <button class="tab-btn" onclick="switchSubTab('stu-assignments', this)">Assignments & Notes</button>
+        <button class="tab-btn" onclick="switchSubTab('stu-attendance', this)">Attendance History</button>
+        <button class="tab-btn" onclick="switchSubTab('stu-reports', this)">Report Cards</button>
+        <button class="tab-btn" onclick="switchSubTab('stu-timetable', this)">Weekly Timetable</button>
+      </div>
+
+      <div id="stu-overview" class="sub-tab-content active">
+        <div class="card" style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+          <img id="disp-stu-photo" class="passport-preview" src="https://via.placeholder.com/100" alt="Passport Photo">
+          <div>
+            <h3 id="disp-stu-name" style="margin:0;">Select/Add Student</h3>
+            <p id="disp-stu-class" style="margin:5px 0; font-size:1rem; color:#555;">N/A</p>
+            <p id="disp-stu-section" style="margin:5px 0; font-size:0.9rem;">Section: -</p>
+            <p id="disp-stu-repdate" style="margin:5px 0; font-size:0.9rem;">Reporting Date: -</p>
+          </div>
+        </div>
+
+        <div class="card-grid">
+          <div class="card"><h3>Parent / Guardian</h3><p id="disp-stu-parent" style="font-size: 1rem;">-</p></div>
+          <div class="card"><h3>Home Address</h3><p id="disp-stu-location" style="font-size: 1rem;">-</p></div>
+          <div class="card"><h3>Medical Notes</h3><p id="disp-stu-medical" style="font-size: 1rem;">None</p></div>
+          <div class="card"><h3>Fee Balance</h3><p id="disp-stu-balance" style="color: #dc3545;">UGX 0</p></div>
+        </div>
+
+        <div class="card">
+          <h3>School Notices & Announcements</h3>
+          <div id="stu-announcements-list">
+            <p style="color:#666;">No recent school notices.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="stu-behavior" class="sub-tab-content">
+        <div class="card">
+          <h3>Student Behavior & Disciplinary Track Record</h3>
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Incident / Observation</th><th>Action Taken</th><th>Recorded By</th></tr>
+            </thead>
+            <tbody id="stu-behavior-tbody">
+              <tr><td colspan="4" style="text-align:center;">No behavior records published.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="stu-fees" class="sub-tab-content">
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <h3>Fee Statement & Payment Receipts</h3>
+            <button class="btn btn-print" onclick="printStudentStatement(currentUser.name, currentUser.studentClass)">Print Fee Statement</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Receipt No</th>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Amount Paid</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="stu-fee-tbody">
+              <tr><td colspan="5" style="text-align:center;">No payment records found.</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top: 15px;" id="stu-fee-summary"><strong>Total Fee:</strong> UGX 0 | <strong>Total Paid:</strong> UGX 0 | <strong style="color:red;">Balance: UGX 0</strong></p>
+        </div>
+      </div>
+
+      <div id="stu-assignments" class="sub-tab-content">
+        <div class="card">
+          <h3>Uploaded Learning Materials & Class Work</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Class</th>
+                <th>Details / Notes</th>
+              </tr>
+            </thead>
+            <tbody id="stu-notes-tbody">
+              <tr><td colspan="3" style="text-align:center;">No learning materials uploaded yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="stu-attendance" class="sub-tab-content">
+        <div class="card">
+          <h3>Student Attendance Register History</h3>
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Class</th><th>Status</th></tr>
+            </thead>
+            <tbody id="stu-attendance-tbody">
+              <tr><td colspan="3" style="text-align:center;">No attendance recorded yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="stu-reports" class="sub-tab-content">
+        <div class="card">
+          <h3>Academic & Learning Report Cards</h3>
+          <div id="student-report-cards-list">
+            <p style="text-align:center;">No published report cards available.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="stu-timetable" class="sub-tab-content">
+        <div class="card">
+          <h3>Class Schedule (Weekday & Weekend)</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Schedule Type</th>
+                <th>Day</th>
+                <th>Time Slot</th>
+                <th>Subject</th>
+                <th>Venue / Class</th>
+              </tr>
+            </thead>
+            <tbody id="student-timetable-rows">
+              <tr><td colspan="5" style="text-align:center;">No timetable entries published yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ================= PRIMARY TEACHER PORTAL ================= -->
+    <div id="teacher-portal" class="portal-section">
+      <h2>Primary Teacher Portal</h2>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchSubTab('tch-rollcall-register', this)">Student Register & Roll Call</button>
+        <button class="tab-btn" onclick="switchSubTab('tch-timetable-mgr', this)">Upload Timetable</button>
+        <button class="tab-btn" onclick="switchSubTab('tch-report-card', this)">Generate Primary Report Cards</button>
+        <button class="tab-btn" onclick="switchSubTab('tch-behavior-mgr', this)">Behavior Log</button>
+        <button class="tab-btn" onclick="switchSubTab('tch-uploads', this)">Upload & Manage Materials</button>
+      </div>
+
+      <div id="tch-rollcall-register" class="sub-tab-content active">
+        <div class="card">
+          <h3>Primary Class Roll Call & Student Register</h3>
+          <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+            <select id="rollcall-class-select" style="max-width: 250px;" onchange="loadRollCallRegister()">
+              <option value="">-- Select Primary Class --</option>
+              <option value="P.1">Penguin (P.1)</option>[cite: 1]
+              <option value="P.2">Daisy (P.2)</option>[cite: 1]
+              <option value="P.3">Parrot (P.3)</option>[cite: 1]
+              <option value="P.4">Sparrow (P.4)</option>[cite: 1]
+              <option value="P.5">Peacock (P.5)</option>[cite: 1]
+              <option value="P.6">Crow (P.6)</option>[cite: 1]
+              <option value="P.7">Eagle (P.7)</option>[cite: 1]
+            </select>
+            <input type="date" id="rollcall-date" style="max-width: 200px;">
+            <button class="btn btn-print" onclick="printClassRegister()">Print Register</button>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Student Name</th>
+                <th>Class & Stream</th>
+                <th>Mark Status</th>
+              </tr>
+            </thead>
+            <tbody id="rollcall-table-body">
+              <tr><td colspan="3" style="text-align:center;">Please select a class to load the register.</td></tr>
+            </tbody>
+          </table>
+          <button class="btn" style="margin-top: 15px;" onclick="saveClassRollCall()">Save Attendance Roll Call</button>
+        </div>
+      </div>
+
+      <div id="tch-timetable-mgr" class="sub-tab-content">
+        <div class="card">
+          <h3>Publish Class Timetable Entry</h3>
+          <form onsubmit="handleTimetableUpload(event)">
+            <label><strong>Select Target Class:</strong></label>
+            <select id="tt-class" required>
+              <option value="">-- Select Class --</option>
+              <option>P.1</option><option>P.2</option><option>P.3</option><option>P.4</option><option>P.5</option><option>P.6</option><option>P.7</option>
+            </select>
+
+            <label><strong>Schedule Type:</strong></label>
+            <select id="tt-type" required>
+              <option value="Weekday">Weekday (Monday - Friday)</option>
+              <option value="Weekend">Weekend / Prep (Saturday - Sunday)</option>
+            </select>
+
+            <label><strong>Day of Week:</strong></label>
+            <select id="tt-day" required>
+              <option value="Monday">Monday</option><option value="Tuesday">Tuesday</option><option value="Wednesday">Wednesday</option><option value="Thursday">Thursday</option><option value="Friday">Friday</option><option value="Saturday">Saturday</option><option value="Sunday">Sunday</option>
+            </select>
+
+            <label><strong>Subject & Time:</strong></label>
+            <input type="text" id="tt-subject" placeholder="Subject / Activity Name" required>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <input type="time" id="tt-start" required>
+              <input type="time" id="tt-end" required>
+            </div>
+            <input type="text" id="tt-venue" placeholder="Venue / Room" value="Main Classroom">
+
+            <button type="submit" class="btn">Publish Timetable Entry</button>
+          </form>
+        </div>
+      </div>
+
+      <div id="tch-report-card" class="sub-tab-content">
+        <div class="card">
+          <h3>Generate Primary Student Academic Report Card</h3>
+          <form onsubmit="handleReportCardUpload(event, false)">
+            <label><strong>Select Student:</strong></label>
+            <select id="rc-student-select" required>
+              <option value="">-- Select Primary Student --</option>
+            </select>
+
+            <label><strong>Select Evaluation Term Stage:</strong></label>
+            <select id="rc-term-stage" required>
+              <option value="BOT1">BOT1 (Beginning of Term 1)</option>
+              <option value="BOT2">BOT2 (Beginning of Term 2)</option>
+              <option value="BOT3">BOT3 (Beginning of Term 3)</option>
+              <option value="MID1">MID1 (Mid Term 1)</option>
+              <option value="MID2">MID2 (Mid Term 2)</option>
+              <option value="MID3">MID3 (Mid Term 3)</option>
+              <option value="END1">END1 (End of Term 1)</option>
+              <option value="END2">END2 (End of Term 2)</option>
+              <option value="END3">END3 (End of Term 3)</option>
+            </select>
+
+            <div id="rc-primary-marks" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <input type="number" id="rc-math" placeholder="Math Mark (100)" min="0" max="100" required>
+              <input type="number" id="rc-eng" placeholder="English Mark (100)" min="0" max="100" required>
+              <input type="number" id="rc-sci" placeholder="Science Mark (100)" min="0" max="100" required>
+              <input type="number" id="rc-sst" placeholder="SST Mark (100)" min="0" max="100" required>
+            </div>
+
+            <label><strong>Division / Level:</strong></label>
+            <select id="rc-division" required>
+              <option value="Division I">Division I</option>
+              <option value="Division II">Division II</option>
+              <option value="Division III">Division III</option>
+              <option value="Division IV">Division IV</option>
+            </select>
+
+            <label><strong>Class Teacher Remarks:</strong></label>
+            <textarea id="rc-comment" placeholder="Teacher Remarks..." rows="3" required></textarea>
+
+            <button type="submit" class="btn">Publish Primary Report Card</button>
+          </form>
+        </div>
+      </div>
+
+      <div id="tch-behavior-mgr" class="sub-tab-content">
+        <div class="card">
+          <h3>Log Student Behavior / Disciplinary Incident</h3>
+          <form onsubmit="handleLogBehavior(event)">
+            <label><strong>Select Student:</strong></label>
+            <select id="beh-student-select" required>
+              <option value="">-- Choose Student --</option>
+            </select>
+            <label><strong>Incident Details / Behavior Note:</strong></label>
+            <textarea id="beh-details" placeholder="Describe behavior..." rows="3" required></textarea>
+            <label><strong>Action Taken / Recommendation:</strong></label>
+            <input type="text" id="beh-action" placeholder="e.g. Parental Caution, Counseling" required>
+            <button type="submit" class="btn">Log Behavior Incident</button>
+          </form>
+        </div>
+      </div>
+
+      <div id="tch-uploads" class="sub-tab-content">
+        <div class="card">
+          <h3>Upload Work & Study Notes from Storage</h3>
+          <form onsubmit="handleUploadNotes(event)">
+            <input type="text" id="note-title" placeholder="Title of Work / Document" required>
+            <select id="note-class" required>
+              <option value="">Select Target Class</option>
+              <option>P.1</option><option>P.2</option><option>P.3</option><option>P.4</option><option>P.5</option><option>P.6</option><option>P.7</option>
+            </select>
+            <label><strong>Select File from Storage or Write Content:</strong></label>
+            <input type="file" id="note-file-input" onchange="readMaterialFile(event)">
+            <textarea id="note-details" placeholder="Write instructions, notes, or storage file summary..." rows="4" required></textarea>
+            <button type="submit" class="btn">Publish Material to Student Storage</button>
+          </form>
+
+          <h4 style="margin-top: 25px;">Uploaded Work in System Storage</h4>
+          <table>
+            <thead>
+              <tr><th>Title</th><th>Class</th><th>Details / Content Preview</th><th>Action</th></tr>
+            </thead>
+            <tbody id="tch-storage-materials-tbody">
+              <tr><td colspan="4" style="text-align:center;">No materials uploaded in storage yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ================= NURSERY TEACHER PORTAL ================= -->
+    <div id="nursery-portal" class="portal-section nursery-theme">
+      <h2>Nursery Section Teacher Dashboard</h2>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchSubTab('nur-rollcall', this)">Nursery Roll Call</button>
+        <button class="tab-btn" onclick="switchSubTab('nur-report-card', this)">Nursery Assessment Cards</button>
+        <button class="tab-btn" onclick="switchSubTab('nur-behavior', this)">Child Behavior Log</button>
+        <button class="tab-btn" onclick="switchSubTab('nur-uploads', this)">Learning Materials Storage</button>
+      </div>
+
+      <div id="nur-rollcall" class="sub-tab-content active">
+        <div class="card nursery-card">
+          <h3>Nursery Class Register</h3>
+          <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+            <select id="nur-rollcall-class" style="max-width: 250px;" onchange="loadNurseryRollCall()">
+              <option value="">-- Select Nursery Class --</option>
+              <option value="Baby">Canary (Baby Class)</option>
+              <option value="Middle">Dove (Middle Class)</option>
+              <option value="Top">Ruby (Top Class)</option>
+            </select>
+            <input type="date" id="nur-rollcall-date" style="max-width: 200px;">
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th>Learner Name</th>
+                <th>Class</th>
+                <th>Mark Attendance</th>
+              </tr>
+            </thead>
+            <tbody id="nur-rollcall-tbody">
+              <tr><td colspan="3" style="text-align:center;">Select a Nursery class to view pupils.</td></tr>
+            </tbody>
+          </table>
+          <button class="btn" style="margin-top: 15px;" onclick="saveNurseryRollCall()">Save Nursery Roll Call</button>
+        </div>
+      </div>
+
+      <div id="nur-report-card" class="sub-tab-content">
+        <div class="card nursery-card">
+          <h3>Generate Nursery Learning Assessment Card</h3>
+          <form onsubmit="handleReportCardUpload(event, true)">
+            <label><strong>Select Nursery Pupil:</strong></label>
+            <select id="rc-nursery-student-select" required>
+              <option value="">-- Select Nursery Learner --</option>
+            </select>
+
+            <label><strong>Select Evaluation Stage:</strong></label>
+            <select id="rc-nur-term-stage" required>
+              <option value="BOT1">BOT1 (Beginning of Term 1)</option>
+              <option value="BOT2">BOT2 (Beginning of Term 2)</option>
+              <option value="BOT3">BOT3 (Beginning of Term 3)</option>
+              <option value="MID1">MID1 (Mid Term 1)</option>
+              <option value="MID2">MID2 (Mid Term 2)</option>
+              <option value="MID3">MID3 (Mid Term 3)</option>
+              <option value="END1">END1 (End of Term 1)</option>
+              <option value="END2">END2 (End of Term 2)</option>
+              <option value="END3">END3 (End of Term 3)</option>
+            </select>
+
+            <label><strong>Learning Areas Assessment (0 - 100):</strong></label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <input type="number" id="rc-num" placeholder="Numbers (0-100)" min="0" max="100" required>
+              <input type="number" id="rc-read" placeholder="Reading (0-100)" min="0" max="100" required>
+              <input type="number" id="rc-gk" placeholder="General Knowledge (0-100)" min="0" max="100" required>
+              <input type="number" id="rc-soc" placeholder="Social Development (0-100)" min="0" max="100" required>
+              <input type="number" id="rc-lang" placeholder="Language Development (0-100)" min="0" max="100" required>
+            </div>
+
+            <label><strong>Overall Nursery Grade Level:</strong></label>
+            <select id="rc-nur-grade" required>
+              <option value="Grade A (Excellent Progress)">Grade A (Excellent Progress)</option>
+              <option value="Grade B (Good Progress)">Grade B (Good Progress)</option>
+              <option value="Grade C (Fair Progress)">Grade C (Fair Progress)</option>
+            </select>
+
+            <label><strong>Caregiver / Teacher Remarks:</strong></label>
+            <textarea id="rc-nur-comment" placeholder="Observation on child's development, social play..." rows="3" required></textarea>
+
+            <button type="submit" class="btn">Publish Nursery Assessment Card</button>
+          </form>
+        </div>
+      </div>
+
+      <div id="nur-behavior" class="sub-tab-content">
+        <div class="card nursery-card">
+          <h3>Log Nursery Learner Observation / Behavior</h3>
+          <form onsubmit="handleNurseryLogBehavior(event)">
+            <label><strong>Select Pupil:</strong></label>
+            <select id="nur-beh-student-select" required>
+              <option value="">-- Choose Pupil --</option>
+            </select>
+            <label><strong>Behavior Observation:</strong></label>
+            <textarea id="nur-beh-details" placeholder="Describe social interactions, nap/meal habits..." rows="3" required></textarea>
+            <label><strong>Action Taken / Teacher Guidance:</strong></label>
+            <input type="text" id="nur-beh-action" placeholder="e.g. Guided play, parental chat" required>
+            <button type="submit" class="btn">Log Learner Observation</button>
+          </form>
+        </div>
+      </div>
+
+      <div id="nur-uploads" class="sub-tab-content">
+        <div class="card nursery-card">
+          <h3>Upload Early Childhood Learning Work from Storage</h3>
+          <form onsubmit="handleNurseryUploadNotes(event)">
+            <input type="text" id="nur-note-title" placeholder="Title / Activity Sheet" required>
+            <select id="nur-note-class" required>
+              <option value="">Select Class</option>
+              <option value="Baby">Canary (Baby)</option>
+              <option value="Middle">Dove (Middle)</option>
+              <option value="Top">Ruby (Top)</option>
+            </select>
+            <input type="file" id="nur-note-file" onchange="readNurseryMaterialFile(event)">
+            <textarea id="nur-note-details" placeholder="Write activity instructions for parents or storage details..." rows="3" required></textarea>
+            <button type="submit" class="btn">Upload Nursery Activity to Storage</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ================= SECRETARY / ADMIN PORTAL ================= -->
+    <div id="admin-portal" class="portal-section">
+      <h2>School Secretary Control & Administration Hub</h2>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchSubTab('sec-add-student', this)">Enter New Records</button>
+        <button class="tab-btn" onclick="switchSubTab('sec-parents-dir', this)">Parents Directory</button>
+        <button class="tab-btn" onclick="switchSubTab('sec-staff-recruitment', this)">Staff Management</button>
+        <button class="tab-btn" onclick="switchSubTab('sec-staff-attendance', this)">Staff Attendance</button>
+        <button class="tab-btn" onclick="switchSubTab('sec-cashier', this)">Record Fee Payment</button>
+        <button class="tab-btn" onclick="switchSubTab('sec-notices', this)">Post School Notices</button>
+        <button class="tab-btn" onclick="switchSubTab('sec-edit-students', this)">Registered Students Directory</button>
+        <button class="tab-btn" onclick="switchSubTab('sec-print-center', this)">Secretary Print Center</button>
+        <button class="tab-btn" onclick="switchSubTab('sec-overview-stats', this)">Clean Financial Overview</button>
+      </div>
+
+      <div id="sec-add-student" class="sub-tab-content active">
+        <div class="card">
+          <h3>Secretary Entry: Register New Student Record</h3>
+          <form onsubmit="handleAddStudent(event)">
+            <label><strong>Student Full Name:</strong></label>
+            <input type="text" id="add-stu-name" placeholder="Enter Full Student Name" required>
+            
+            <label><strong>Upload Student Passport Photo:</strong></label>
+            <input type="file" id="add-stu-photo" accept="image/*" onchange="previewPassportPhoto(event)">
+            <img id="photo-preview" class="passport-preview" src="https://via.placeholder.com/100" style="margin-bottom:10px;">
+
+            <label><strong>Assigned Class:</strong></label>
+            <select id="add-stu-class" required>
+              <option value="">-- Choose Class --</option>
+              <option value="Baby">Canary (Baby Class)</option>
+              <option value="Middle">Dove (Middle Class)</option>
+              <option value="Top">Ruby (Top Class)</option>
+              <option value="P.1">Penguin (P.1)</option>
+              <option value="P.2">Daisy (P.2)</option>
+              <option value="P.3">Parrot (P.3)</option>
+              <option value="P.4">Sparrow (P.4)</option>
+              <option value="P.5">Peacock (P.5)</option>
+              <option value="P.6">Crow (P.6)</option>
+              <option value="P.7">Eagle (P.7)</option>
+            </select>
+            
+            <label><strong>Stream:</strong></label>
+            <input type="text" id="add-stu-stream" placeholder="e.g. Blue, Red, North, A" required>
+
+            <label><strong>Section:</strong></label>
+            <select id="add-stu-section" required>
+              <option value="Day">Day</option>
+              <option value="Boarding">Boarding</option>
+            </select>
+
+            <label><strong>Parent's Full Name & Phone Number:</strong></label>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+              <input type="text" id="add-stu-pname" placeholder="Parent / Guardian Name" required>
+              <input type="text" id="add-stu-pphone" placeholder="Parent Contact Number" required>
+            </div>
+
+            <label><strong>Home Location:</strong></label>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+              <input type="text" id="add-stu-village" placeholder="Village" required>
+              <input type="text" id="add-stu-parish" placeholder="Parish" required>
+              <input type="text" id="add-stu-subcounty" placeholder="Sub-County" required>
+              <input type="text" id="add-stu-district" placeholder="District" required>
+            </div>
+
+            <label><strong>Medical Complications / Health Notes:</strong></label>
+            <input type="text" id="add-stu-medical" placeholder="e.g. Asthma, Allergies, None">
+
+            <label><strong>Student Reporting Date:</strong></label>
+            <input type="date" id="add-stu-repdate" required>
+
+            <label><strong>Assign Student Password / PIN:</strong></label>
+            <input type="text" id="add-stu-pass" placeholder="Create Secret Password or PIN for Student" required>
+
+            <label><strong>Total Agreed Term Fee (UGX):</strong></label>
+            <input type="number" id="add-stu-fee" placeholder="e.g. 500000" required>
+            
+            <button type="submit" class="btn">Save New Student Record</button>
+          </form>
+        </div>
+      </div>
+
+      <div id="sec-parents-dir" class="sub-tab-content">
+        <div class="card">
+          <h3>Parents Directory & Student Linking</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Parent Name</th>
+                <th>Phone Number</th>
+                <th>Student Name</th>
+                <th>Class</th>
+                <th>Section</th>
+              </tr>
+            </thead>
+            <tbody id="admin-parents-list">
+              <tr><td colspan="5" style="text-align:center;">No parent records logged.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="sec-staff-recruitment" class="sub-tab-content">
+        <div class="card">
+          <h3>Staff Recruitment & Personnel Records</h3>
+          <form onsubmit="handleStaffRecruitment(event)">
+            <label><strong>Staff Full Name:</strong></label>
+            <input type="text" id="staff-name" placeholder="Full Name" required>
+
+            <label><strong>Assign Staff Username ID:</strong></label>
+            <input type="text" id="staff-username" placeholder="Create Username for Staff" required>
+
+            <label><strong>Assign Staff Password:</strong></label>
+            <input type="text" id="staff-password" placeholder="Create Password for Staff" required>
+
+            <label><strong>Phone Number:</strong></label>
+            <input type="text" id="staff-phone" placeholder="Phone Contact" required>
+
+            <label><strong>Upload Staff Photo:</strong></label>
+            <input type="file" id="staff-photo" accept="image/*">
+
+            <label><strong>Next of Kin Details:</strong></label>
+            <input type="text" id="staff-kin" placeholder="Next of Kin Name & Phone" required>
+
+            <label><strong>Assigned Responsibility / Role:</strong></label>
+            <select id="staff-portal-role" required>
+              <option value="Teacher">Primary Teacher</option>
+              <option value="NurseryTeacher">Nursery Teacher</option>
+            </select>
+
+            <label><strong>Salary Wage (UGX):</strong></label>
+            <input type="number" id="staff-salary" placeholder="Monthly Wage" required>
+
+            <label><strong>Date of Recruitment:</strong></label>
+            <input type="date" id="staff-date" required>
+
+            <label><strong>Qualifications & Uploaded Documents:</strong></label>
+            <input type="text" id="staff-academic" placeholder="Academic Qualification Level" required>
+
+            <button type="submit" class="btn">Recruit & Save Staff Member</button>
+          </form>
+
+          <h4 style="margin-top:30px;">Recruited Staff Registry</h4>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>Role</th>
+                <th>Phone</th>
+                <th>Next of Kin</th>
+                <th>Wage</th>
+                <th>Recruited Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="staff-registry-tbody">
+              <tr><td colspan="9" style="text-align:center;">No staff members registered yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="sec-staff-attendance" class="sub-tab-content">
+        <div class="card">
+          <h3>Staff Attendance Register & Track Record</h3>
+          <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <input type="date" id="staff-att-date" style="max-width:200px;">
+            <button class="btn" onclick="loadStaffAttendanceRegister()">Load Register</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Staff Name</th>
+                <th>Role</th>
+                <th>Mark Status</th>
+              </tr>
+            </thead>
+            <tbody id="staff-att-tbody">
+              <tr><td colspan="3" style="text-align:center;">Click Load Register to view staff members.</td></tr>
+            </tbody>
+          </table>
+          <button class="btn" style="margin-top:15px;" onclick="saveStaffAttendance()">Save Staff Attendance</button>
+        </div>
+      </div>
+
+      <div id="sec-cashier" class="sub-tab-content">
+        <div class="card">
+          <h3>Record Fee Payment & Generate Receipt</h3>
+          <form id="payment-form" onsubmit="handleSecretaryPayment(event)">
+            <label><strong>Select Student:</strong></label>
+            <select id="pay-student-select" required>
+              <option value="">-- Choose Registered Student --</option>
+            </select>
+
+            <label><strong>Amount Paid (UGX):</strong></label>
+            <input type="number" id="pay-amount" placeholder="Amount Paid" required>
+
+            <label><strong>Payment Category:</strong></label>
+            <select id="pay-type">
+              <option value="Tuition Fee">Tuition Fee</option>
+              <option value="Admission Fee">Admission Fee</option>
+              <option value="School Donation">School Donation</option>
+              <option value="Uniform / Books">Uniform / Books</option>
+            </select>
+
+            <label><strong>Receipt Number:</strong></label>
+            <input type="text" id="pay-receipt" placeholder="e.g. RCT-1001" required>
+
+            <button type="submit" class="btn">Save Payment & Print Receipt</button>
+          </form>
+        </div>
+      </div>
+
+      <div id="sec-notices" class="sub-tab-content">
+        <div class="card">
+          <h3>Post General School Notice / Announcement</h3>
+          <form onsubmit="handlePostNotice(event)">
+            <input type="text" id="notice-title" placeholder="Notice Title / Subject" required>
+            <textarea id="notice-content" placeholder="Write announcement details..." rows="4" required></textarea>
+            <button type="submit" class="btn">Post Announcement</button>
+          </form>
+        </div>
+      </div>
+
+      <div id="sec-edit-students" class="sub-tab-content">
+        <div class="card">
+          <h3>Registered Students Directory</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Photo</th>
+                <th>Student Name</th>
+                <th>Class & Stream</th>
+                <th>Password / PIN</th>
+                <th>Section</th>
+                <th>Parent Phone</th>
+                <th>Paid Fees</th>
+                <th>Balance</th>
+                <th>To Pay</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin-students-list">
+              <tr><td colspan="10" style="text-align:center;">No students registered yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="sec-print-center" class="sub-tab-content">
+        <div class="card">
+          <h3>Secretary Document Print Center</h3>
+          <p>Choose what document you would like to print from the drop-down options:</p>
+          
+          <div style="display: grid; gap: 15px; max-width: 600px;">
+            <label><strong>1. Choose Document to Print:</strong></label>
+            <select id="sec-print-choice" onchange="togglePrintOptions()">
+              <option value="defaulters">Fee Defaulters & Balance List</option>
+              <option value="student-statement">Individual Student Fee Statement & Receipt History</option>
+              <option value="full-student-list">Full Registered Student Directory</option>
+              <option value="rollcall-summary">Class Roll Call / Register Summary</option>
+              <option value="financial-summary">School Financial Overview Report</option>
+            </select>
+
+            <div id="print-opt-student" style="display:none;">
+              <label><strong>Select Student:</strong></label>
+              <select id="sec-print-student-select">
+                <option value="">-- Choose Student --</option>
+              </select>
+            </div>
+
+            <div id="print-opt-class" style="display:none;">
+              <label><strong>Select Class:</strong></label>
+              <select id="sec-print-class-select">
+                <option value="Baby">Canary (Baby)</option>
+                <option value="Middle">Dove (Middle)</option>
+                <option value="Top">Ruby (Top)</option>
+                <option value="P.1">P.1</option><option value="P.2">P.2</option><option value="P.3">P.3</option><option value="P.4">P.4</option><option value="P.5">P.5</option><option value="P.6">P.6</option><option value="P.7">P.7</option>
+              </select>
+            </div>
+
+            <button class="btn btn-print" onclick="executeSecretaryPrint()" style="padding: 12px; font-size: 1rem;">
+              Generate & Print Selected Document
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cleaned Financial Overview Section -->
+      <div id="sec-overview-stats" class="sub-tab-content">
+        <div class="card-grid">
+          <div class="card">
+            <h3>Total Enrolled Learners</h3>
+            <p id="stat-total-students">0 Learners</p>
+          </div>
+          <div class="card">
+            <h3>Expected Tuition Fees</h3>
+            <p id="stat-expected-fees">UGX 0</p>
+          </div>
+          <div class="card">
+            <h3>Total Fees Collected</h3>
+            <p id="stat-collected-fees" style="color: #28a745;">UGX 0</p>
+          </div>
+          <div class="card">
+            <h3>Total Outstanding Fees</h3>
+            <p id="stat-outstanding-fees" style="color: #dc3545;">UGX 0</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ================= DEDICATED PRINT CONTAINER ================= -->
+  <div id="printable-area"></div>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    // Master Admin Password
+    const ADMIN_PASSWORD = "571@Jason";
+
+    // System Storage Database
+    let db = {
+      students: JSON.parse(localStorage.getItem('wjs_students')) || [],
+      payments: JSON.parse(localStorage.getItem('wjs_payments')) || [],
+      timetable: JSON.parse(localStorage.getItem('wjs_timetable')) || [],
+      reports: JSON.parse(localStorage.getItem('wjs_reports')) || [],
+      attendance: JSON.parse(localStorage.getItem('wjs_attendance')) || [],
+      behavior: JSON.parse(localStorage.getItem('wjs_behavior')) || [],
+      staff: JSON.parse(localStorage.getItem('wjs_staff')) || [],
+      staffAttendance: JSON.parse(localStorage.getItem('wjs_staff_attendance')) || [],
+      notes: JSON.parse(localStorage.getItem('wjs_notes')) || [],
+      notices: JSON.parse(localStorage.getItem('wjs_notices')) || []
+    };
+
+    let currentUser = null;
+    let tempPhotoData = "https://via.placeholder.com/100";
+    let tempUploadedMaterial = "";
+
+    function saveData() {
+      localStorage.setItem('wjs_students', JSON.stringify(db.students));
+      localStorage.setItem('wjs_payments', JSON.stringify(db.payments));
+      localStorage.setItem('wjs_timetable', JSON.stringify(db.timetable));
+      localStorage.setItem('wjs_reports', JSON.stringify(db.reports));
+      localStorage.setItem('wjs_attendance', JSON.stringify(db.attendance));
+      localStorage.setItem('wjs_behavior', JSON.stringify(db.behavior));
+      localStorage.setItem('wjs_staff', JSON.stringify(db.staff));
+      localStorage.setItem('wjs_staff_attendance', JSON.stringify(db.staffAttendance));
+      localStorage.setItem('wjs_notes', JSON.stringify(db.notes));
+      localStorage.setItem('wjs_notices', JSON.stringify(db.notices));
+      
+      updateOverviewStats();
+      populateStudentDropdowns();
+      renderParentsDirectory();
+      renderStaffRegistry();
+      renderTeacherStorageMaterials();
+    }
+
+    function formatMoney(amount) {
+      const number = Number(amount) || 0;
+      return 'UGX ' + Math.round(number).toLocaleString();
+    }
+
+    function previewPassportPhoto(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          tempPhotoData = e.target.result;
+          document.getElementById('photo-preview').src = tempPhotoData;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function readMaterialFile(event) {
+      const file = event.target.files[0];
+      if (file) {
+        tempUploadedMaterial = `[File Attached: ${file.name}] `;
+        document.getElementById('note-details').value = tempUploadedMaterial + document.getElementById('note-details').value;
+      }
+    }
+
+    function readNurseryMaterialFile(event) {
+      const file = event.target.files[0];
+      if (file) {
+        document.getElementById('nur-note-details').value = `[File Attached: ${file.name}] ` + document.getElementById('nur-note-details').value;
+      }
+    }
+
+    function populateStudentDropdowns() {
+      const primarySelects = [
+        document.getElementById('rc-student-select'),
+        document.getElementById('beh-student-select')
+      ];
+
+      const nurserySelects = [
+        document.getElementById('rc-nursery-student-select'),
+        document.getElementById('nur-beh-student-select')
+      ];
+
+      const generalSelects = [
+        document.getElementById('sec-print-student-select'),
+        document.getElementById('pay-student-select')
+      ];
+
+      primarySelects.forEach(sel => {
+        if (!sel) return;
+        sel.innerHTML = '<option value="">-- Choose Primary Student --</option>';
+        db.students.filter(s => !['Baby', 'Middle', 'Top'].includes(s.sClass)).forEach(s => {
+          sel.innerHTML += `<option value="${s.name} (${s.sClass})">${s.name} (${s.sClass})</option>`;
+        });
+      });
+
+      nurserySelects.forEach(sel => {
+        if (!sel) return;
+        sel.innerHTML = '<option value="">-- Choose Nursery Pupil --</option>';
+        db.students.filter(s => ['Baby', 'Middle', 'Top'].includes(s.sClass)).forEach(s => {
+          sel.innerHTML += `<option value="${s.name} (${s.sClass})">${s.name} (${s.sClass})</option>`;
+        });
+      });
+
+      generalSelects.forEach(sel => {
+        if (!sel) return;
+        sel.innerHTML = '<option value="">-- Choose Registered Student --</option>';
+        db.students.forEach(s => {
+          sel.innerHTML += `<option value="${s.name} (${s.sClass})">${s.name} (${s.sClass})</option>`;
+        });
+      });
+    }
+
+    function toggleAuthFields() {
+      const role = document.getElementById('auth-role').value;
+      const stuFields = document.getElementById('student-auth-fields');
+      const staffFields = document.getElementById('staff-auth-fields');
+
+      if (role === 'Student') {
+        stuFields.style.display = 'block';
+        staffFields.style.display = 'none';
+        document.getElementById('auth-student-name').required = true;
+        document.getElementById('auth-student-class').required = true;
+        document.getElementById('auth-student-pass').required = true;
+
+        document.getElementById('auth-staff-id').required = false;
+        document.getElementById('auth-pass').required = false;
+      } else {
+        stuFields.style.display = 'none';
+        staffFields.style.display = 'block';
+        document.getElementById('auth-student-name').required = false;
+        document.getElementById('auth-student-class').required = false;
+        document.getElementById('auth-student-pass').required = false;
+
+        document.getElementById('auth-staff-id').required = true;
+        document.getElementById('auth-pass').required = true;
+      }
+    }
+
+    function handleAuthSubmit(e) {
+      e.preventDefault();
+      const role = document.getElementById('auth-role').value;
+
+      if (role === 'Secretary') {
+        const password = document.getElementById('auth-pass').value;
+        if (password !== ADMIN_PASSWORD) {
+          alert('Access Denied: Invalid Master Password for Admin/Secretary.');
+          return;
+        }
+        const username = document.getElementById('auth-staff-id').value;
+        currentUser = { role: 'Secretary', name: username };
+        showPortal('admin-portal');
+        renderStudentsList();
+        renderParentsDirectory();
+        renderStaffRegistry();
+
+      } else if (role === 'Student') {
+        const typedName = document.getElementById('auth-student-name').value.trim();
+        const selectedClass = document.getElementById('auth-student-class').value;
+        const typedPassword = document.getElementById('auth-student-pass').value.trim();
+
+        const studentRec = db.students.find(s => 
+          s.name.toLowerCase() === typedName.toLowerCase() && 
+          s.sClass === selectedClass && 
+          String(s.password) === typedPassword
+        );
+
+        if (!studentRec) {
+          alert('Invalid Sign In Credentials! Please verify your Name, Class, and Password with the Secretary.');
+          return;
+        }
+
+        currentUser = { role: 'Student', name: studentRec.name, studentClass: studentRec.sClass, stream: studentRec.stream };
+        showPortal('student-portal');
+        loadStudentPortalData();
+
+      } else if (role === 'Teacher' || role === 'NurseryTeacher') {
+        const username = document.getElementById('auth-staff-id').value.trim();
+        const password = document.getElementById('auth-pass').value.trim();
+
+        const staffRec = db.staff.find(st => 
+          st.username.toLowerCase() === username.toLowerCase() && 
+          st.password === password &&
+          st.portalRole === role
+        );
+
+        if (!staffRec) {
+          alert('Invalid Teacher Credentials or assigned role mismatch. Contact the Secretary for your password.');
+          return;
+        }
+
+        if (role === 'Teacher') {
+          currentUser = { role: 'Primary Teacher', name: staffRec.name };
+          showPortal('teacher-portal');
+          renderTeacherStorageMaterials();
+        } else {
+          currentUser = { role: 'Nursery Teacher', name: staffRec.name };
+          showPortal('nursery-portal');
+        }
+      }
+
+      document.getElementById('login-modal').style.display = 'none';
+      document.getElementById('logout-container').style.display = 'block';
+      document.getElementById('user-banner').style.display = 'block';
+      document.getElementById('current-user-info').innerText = `${currentUser.role}: ${currentUser.name} ${currentUser.studentClass ? '(' + currentUser.studentClass + ')' : ''}`;
+    }
+
+    function showPortal(portalId) {
+      document.querySelectorAll('.portal-section').forEach(el => el.classList.remove('active'));
+      document.getElementById(portalId).classList.add('active');
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      document.getElementById('user-banner').style.display = 'none';
+      document.getElementById('logout-container').style.display = 'none';
+      document.querySelectorAll('.portal-section').forEach(el => el.classList.remove('active'));
+      document.getElementById('login-modal').style.display = 'flex';
+      document.getElementById('auth-form').reset();
+      toggleAuthFields();
+    }
+
+    function switchSubTab(tabId, btn) {
+      const parentSection = btn.closest('.portal-section');
+      parentSection.querySelectorAll('.sub-tab-content').forEach(el => el.classList.remove('active'));
+      parentSection.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    function handleAddStudent(e) {
+      e.preventDefault();
+      const name = document.getElementById('add-stu-name').value.trim();
+      const sClass = document.getElementById('add-stu-class').value;
+      const stream = document.getElementById('add-stu-stream').value.trim();
+      const section = document.getElementById('add-stu-section').value;
+      const parentName = document.getElementById('add-stu-pname').value.trim();
+      const parentPhone = document.getElementById('add-stu-pphone').value.trim();
+      const village = document.getElementById('add-stu-village').value.trim();
+      const parish = document.getElementById('add-stu-parish').value.trim();
+      const subcounty = document.getElementById('add-stu-subcounty').value.trim();
+      const district = document.getElementById('add-stu-district').value.trim();
+      const medical = document.getElementById('add-stu-medical').value.trim() || 'None';
+      const reportingDate = document.getElementById('add-stu-repdate').value;
+      const password = document.getElementById('add-stu-pass').value.trim();
+      const fee = Number(document.getElementById('add-stu-fee').value);
+
+      db.students.push({ 
+        name, sClass, stream, section, photo: tempPhotoData,
+        parentName, parentPhone, location: `${village}, ${parish}, ${subcounty}, ${district}`,
+        medical, reportingDate, password, fee 
+      });
+
+      saveData();
+      renderStudentsList();
+      alert(`Record created successfully for ${name}.\nAssigned Student Password: ${password}`);
+      e.target.reset();
+      document.getElementById('photo-preview').src = "https://via.placeholder.com/100";
+      tempPhotoData = "https://via.placeholder.com/100";
+    }
+
+    function deleteStudent(index) {
+      if (confirm(`Are you sure you want to remove ${db.students[index].name}?`)) {
+        db.students.splice(index, 1);
+        saveData();
+        renderStudentsList();
+      }
+    }
+
+    function deleteStaff(index) {
+      if (confirm(`Are you sure you want to remove ${db.staff[index].name} from staff records?`)) {
+        db.staff.splice(index, 1);
+        saveData();
+        renderStaffRegistry();
+      }
+    }
+
+    function renderStudentsList() {
+      const tbody = document.getElementById('admin-students-list');
+      tbody.innerHTML = '';
+      if (db.students.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;">No students registered yet.</td></tr>';
+        return;
+      }
+
+      db.students.forEach((s, idx) => {
+        const paid = db.payments
+          .filter(p => p.name.toLowerCase() === s.name.toLowerCase() && p.sClass === s.sClass)
+          .reduce((sum, p) => sum + Number(p.amount), 0);
+        const balance = s.fee - paid;
+
+        tbody.innerHTML += `
+          <tr>
+            <td><img src="${s.photo || 'https://via.placeholder.com/100'}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;"></td>
+            <td><strong>${s.name}</strong></td>
+            <td>${s.sClass} (${s.stream})</td>
+            <td><strong style="color: #003366;">${s.password || '-'}</strong></td>
+            <td>${s.section}</td>
+            <td>${s.parentPhone}</td>
+            <td style="color: green; font-weight: bold;">${formatMoney(paid)}</td>
+            <td style="color: ${balance > 0 ? 'red' : 'green'}; font-weight: bold;">${formatMoney(balance)}</td>
+            <td style="color: var(--primary); font-weight: bold;">${formatMoney(s.fee)}</td>
+            <td><button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.8rem;" onclick="deleteStudent(${idx})">Delete</button></td>
+          </tr>
+        `;
+      });
+    }
+
+    function renderParentsDirectory() {
+      const tbody = document.getElementById('admin-parents-list');
+      if(!tbody) return;
+      tbody.innerHTML = '';
+      if (db.students.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No parent records logged.</td></tr>';
+        return;
+      }
+
+      db.students.forEach(s => {
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${s.parentName || 'N/A'}</strong></td>
+            <td>${s.parentPhone || 'N/A'}</td>
+            <td>${s.name}</td>
+            <td>${s.sClass}</td>
+            <td>${s.section}</td>
+          </tr>
+        `;
+      });
+    }
+
+    function handleStaffRecruitment(e) {
+      e.preventDefault();
+      const staffMember = {
+        name: document.getElementById('staff-name').value.trim(),
+        username: document.getElementById('staff-username').value.trim(),
+        password: document.getElementById('staff-password').value.trim(),
+        phone: document.getElementById('staff-phone').value.trim(),
+        kin: document.getElementById('staff-kin').value.trim(),
+        portalRole: document.getElementById('staff-portal-role').value,
+        role: document.getElementById('staff-portal-role').value === 'Teacher' ? 'Primary Teacher' : 'Nursery Teacher',
+        salary: document.getElementById('staff-salary').value,
+        recruitmentDate: document.getElementById('staff-date').value,
+        academic: document.getElementById('staff-academic').value
+      };
+
+      db.staff.push(staffMember);
+      saveData();
+      alert(`Staff member registered successfully!\nAssigned Username: ${staffMember.username}\nAssigned Password: ${staffMember.password}`);
+      e.target.reset();
+    }
+
+    function renderStaffRegistry() {
+      const tbody = document.getElementById('staff-registry-tbody');
+      if(!tbody) return;
+      tbody.innerHTML = '';
+      if(db.staff.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;">No staff members registered yet.</td></tr>';
+        return;
+      }
+
+      db.staff.forEach((st, idx) => {
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${st.name}</strong></td>
+            <td>${st.username || '-'}</td>
+            <td><strong style="color: #003366;">${st.password || '-'}</strong></td>
+            <td>${st.role}</td>
+            <td>${st.phone}</td>
+            <td>${st.kin}</td>
+            <td>${formatMoney(st.salary)}</td>
+            <td>${st.recruitmentDate}</td>
+            <td><button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.8rem;" onclick="deleteStaff(${idx})">Delete</button></td>
+          </tr>
+        `;
+      });
+    }
+
+    let currentStaffAtt = {};
+    function loadStaffAttendanceRegister() {
+      const tbody = document.getElementById('staff-att-tbody');
+      tbody.innerHTML = '';
+      if(db.staff.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No staff registered in system.</td></tr>';
+        return;
+      }
+
+      currentStaffAtt = {};
+      db.staff.forEach((st, idx) => {
+        currentStaffAtt[st.name] = 'Present';
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${st.name}</strong></td>
+            <td>${st.role}</td>
+            <td>
+              <button class="rollcall-status-btn selected-present" id="btn-sp-${idx}" onclick="setStaffAttStatus('${st.name}', 'Present', ${idx})">Present</button>
+              <button class="rollcall-status-btn" id="btn-sa-${idx}" onclick="setStaffAttStatus('${st.name}', 'Absent', ${idx})">Absent</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function setStaffAttStatus(name, status, idx) {
+      currentStaffAtt[name] = status;
+      document.getElementById(`btn-sp-${idx}`).className = 'rollcall-status-btn' + (status === 'Present' ? ' selected-present' : '');
+      document.getElementById(`btn-sa-${idx}`).className = 'rollcall-status-btn' + (status === 'Absent' ? ' selected-absent' : '');
+    }
+
+    function saveStaffAttendance() {
+      const date = document.getElementById('staff-att-date').value || new Date().toISOString().split('T')[0];
+      for(let name in currentStaffAtt) {
+        db.staffAttendance.push({ name, date, status: currentStaffAtt[name] });
+      }
+      saveData();
+      alert('Staff attendance recorded!');
+    }
+
+    function handleSecretaryPayment(e) {
+      e.preventDefault();
+      const selectedValue = document.getElementById('pay-student-select').value;
+      const studentRec = db.students.find(s => `${s.name} (${s.sClass})` === selectedValue);
+
+      if(!studentRec) {
+        alert("Please select a valid registered student.");
+        return;
+      }
+
+      const pay = {
+        name: studentRec.name,
+        sClass: studentRec.sClass,
+        amount: Number(document.getElementById('pay-amount').value),
+        type: document.getElementById('pay-type').value,
+        receipt: document.getElementById('pay-receipt').value,
+        date: new Date().toISOString().split('T')[0]
+      };
+
+      db.payments.push(pay);
+      saveData();
+      renderStudentsList();
+      alert(`Payment of ${formatMoney(pay.amount)} recorded for ${pay.name}`);
+      printSingleReceipt(pay);
+      e.target.reset();
+    }
+
+    function handlePostNotice(e) {
+      e.preventDefault();
+      const notice = {
+        title: document.getElementById('notice-title').value,
+        content: document.getElementById('notice-content').value,
+        date: new Date().toLocaleDateString()
+      };
+      db.notices.push(notice);
+      saveData();
+      alert('Announcement posted successfully!');
+      e.target.reset();
+    }
+
+    let currentRollCallData = {};
+
+    function loadRollCallRegister() {
+      const selectedClass = document.getElementById('rollcall-class-select').value;
+      const tbody = document.getElementById('rollcall-table-body');
+      tbody.innerHTML = '';
+
+      if (!selectedClass) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Please select a class to load the register.</td></tr>';
+        return;
+      }
+
+      const filteredStudents = db.students.filter(s => s.sClass === selectedClass);
+      if (filteredStudents.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No registered students found in this class.</td></tr>';
+        return;
+      }
+
+      currentRollCallData = {};
+      filteredStudents.forEach((stu, index) => {
+        currentRollCallData[stu.name] = 'Present';
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${stu.name}</strong></td>
+            <td>${stu.sClass} (${stu.stream})</td>
+            <td>
+              <button class="rollcall-status-btn selected-present" id="btn-p-${index}" onclick="setRollCallStatus('${stu.name}', 'Present', ${index})">Present</button>
+              <button class="rollcall-status-btn" id="btn-a-${index}" onclick="setRollCallStatus('${stu.name}', 'Absent', ${index})">Absent</button>
+              <button class="rollcall-status-btn" id="btn-l-${index}" onclick="setRollCallStatus('${stu.name}', 'Late', ${index})">Late</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function setRollCallStatus(name, status, index) {
+      currentRollCallData[name] = status;
+      document.getElementById(`btn-p-${index}`).className = 'rollcall-status-btn' + (status === 'Present' ? ' selected-present' : '');
+      document.getElementById(`btn-a-${index}`).className = 'rollcall-status-btn' + (status === 'Absent' ? ' selected-absent' : '');
+      document.getElementById(`btn-l-${index}`).className = 'rollcall-status-btn' + (status === 'Late' ? ' selected-late' : '');
+    }
+
+    function saveClassRollCall() {
+      const selectedClass = document.getElementById('rollcall-class-select').value;
+      const date = document.getElementById('rollcall-date').value || new Date().toISOString().split('T')[0];
+
+      if (!selectedClass) {
+        alert('Select a class first.');
+        return;
+      }
+
+      for (let name in currentRollCallData) {
+        db.attendance.push({ name: name, sClass: selectedClass, date: date, status: currentRollCallData[name] });
+      }
+
+      saveData();
+      alert('Class Roll Call saved successfully!');
+    }
+
+    let nurseryRollCallData = {};
+    function loadNurseryRollCall() {
+      const cls = document.getElementById('nur-rollcall-class').value;
+      const tbody = document.getElementById('nur-rollcall-tbody');
+      tbody.innerHTML = '';
+
+      if (!cls) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Select a Nursery class to view pupils.</td></tr>';
+        return;
+      }
+
+      const pupils = db.students.filter(s => s.sClass === cls);
+      if (pupils.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No pupils registered in this Nursery class.</td></tr>';
+        return;
+      }
+
+      nurseryRollCallData = {};
+      pupils.forEach((p, idx) => {
+        nurseryRollCallData[p.name] = 'Present';
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${p.name}</strong></td>
+            <td>${p.sClass}</td>
+            <td>
+              <button class="rollcall-status-btn selected-present" id="nbtn-p-${idx}" onclick="setNurseryRollCall('${p.name}', 'Present', ${idx})">Present</button>
+              <button class="rollcall-status-btn" id="nbtn-a-${idx}" onclick="setNurseryRollCall('${p.name}', 'Absent', ${idx})">Absent</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function setNurseryRollCall(name, status, idx) {
+      nurseryRollCallData[name] = status;
+      document.getElementById(`nbtn-p-${idx}`).className = 'rollcall-status-btn' + (status === 'Present' ? ' selected-present' : '');
+      document.getElementById(`nbtn-a-${idx}`).className = 'rollcall-status-btn' + (status === 'Absent' ? ' selected-absent' : '');
+    }
+
+    function saveNurseryRollCall() {
+      const cls = document.getElementById('nur-rollcall-class').value;
+      const date = document.getElementById('nur-rollcall-date').value || new Date().toISOString().split('T')[0];
+
+      if (!cls) return alert('Select a class.');
+
+      for (let name in nurseryRollCallData) {
+        db.attendance.push({ name: name, sClass: cls, date: date, status: nurseryRollCallData[name] });
+      }
+
+      saveData();
+      alert('Nursery attendance saved!');
+    }
+
+    function handleLogBehavior(e) {
+      e.preventDefault();
+      const val = document.getElementById('beh-student-select').value;
+      const studentRec = db.students.find(s => `${s.name} (${s.sClass})` === val);
+
+      if(!studentRec) return alert("Select student.");
+
+      db.behavior.push({
+        name: studentRec.name,
+        sClass: studentRec.sClass,
+        details: document.getElementById('beh-details').value,
+        action: document.getElementById('beh-action').value,
+        recordedBy: currentUser ? currentUser.name : 'Teacher',
+        date: new Date().toISOString().split('T')[0]
+      });
+
+      saveData();
+      alert('Behavior incident logged!');
+      e.target.reset();
+    }
+
+    function handleNurseryLogBehavior(e) {
+      e.preventDefault();
+      const val = document.getElementById('nur-beh-student-select').value;
+      const studentRec = db.students.find(s => `${s.name} (${s.sClass})` === val);
+
+      if(!studentRec) return alert("Select pupil.");
+
+      db.behavior.push({
+        name: studentRec.name,
+        sClass: studentRec.sClass,
+        details: document.getElementById('nur-beh-details').value,
+        action: document.getElementById('nur-beh-action').value,
+        recordedBy: currentUser ? currentUser.name : 'Nursery Caregiver',
+        date: new Date().toISOString().split('T')[0]
+      });
+
+      saveData();
+      alert('Pupil behavior logged!');
+      e.target.reset();
+    }
+
+    function handleTimetableUpload(e) {
+      e.preventDefault();
+      const entry = {
+        sClass: document.getElementById('tt-class').value,
+        type: document.getElementById('tt-type').value,
+        day: document.getElementById('tt-day').value,
+        subject: document.getElementById('tt-subject').value,
+        start: document.getElementById('tt-start').value,
+        end: document.getElementById('tt-end').value,
+        venue: document.getElementById('tt-venue').value
+      };
+
+      db.timetable.push(entry);
+      saveData();
+      alert('Timetable Entry Published!');
+      e.target.reset();
+    }
+
+    function calculateGrade(score) {
+      score = Number(score);
+      if (score >= 80) return { grade: 'D1', agg: 1 };
+      if (score >= 70) return { grade: 'D2', agg: 2 };
+      if (score >= 65) return { grade: 'C3', agg: 3 };
+      if (score >= 60) return { grade: 'C4', agg: 4 };
+      if (score >= 55) return { grade: 'C5', agg: 5 };
+      if (score >= 50) return { grade: 'C6', agg: 6 };
+      if (score >= 45) return { grade: 'P7', agg: 7 };
+      if (score >= 40) return { grade: 'P8', agg: 8 };
+      return { grade: 'F9', agg: 9 };
+    }
+
+    function handleReportCardUpload(e, isNursery) {
+      e.preventDefault();
+      const selectId = isNursery ? 'rc-nursery-student-select' : 'rc-student-select';
+      const selectedValue = document.getElementById(selectId).value;
+      const stuRec = db.students.find(s => `${s.name} (${s.sClass})` === selectedValue);
+
+      if(!stuRec) {
+        alert("Please select a student.");
+        return;
+      }
+
+      const termStage = isNursery ? document.getElementById('rc-nur-term-stage').value : document.getElementById('rc-term-stage').value;
+
+      let report = {
+        name: stuRec.name,
+        sClass: stuRec.sClass,
+        termStage: termStage,
+        photo: stuRec.photo || 'https://via.placeholder.com/100',
+        isNursery: isNursery
+      };
+
+      if (isNursery) {
+        const num = Number(document.getElementById('rc-num').value);
+        const read = Number(document.getElementById('rc-read').value);
+        const gk = Number(document.getElementById('rc-gk').value);
+        const soc = Number(document.getElementById('rc-soc').value);
+        const lang = Number(document.getElementById('rc-lang').value);
+
+        report.division = document.getElementById('rc-nur-grade').value;
+        report.comment = document.getElementById('rc-nur-comment').value;
+        report.marks = { num, read, gk, soc, lang };
+        report.total = num + read + gk + soc + lang;
+        report.average = (report.total / 5).toFixed(1);
+      } else {
+        const math = Number(document.getElementById('rc-math').value);
+        const eng = Number(document.getElementById('rc-eng').value);
+        const sci = Number(document.getElementById('rc-sci').value);
+        const sst = Number(document.getElementById('rc-sst').value);
+
+        report.division = document.getElementById('rc-division').value;
+        report.comment = document.getElementById('rc-comment').value;
+        report.marks = { math, eng, sci, sst };
+        report.total = math + eng + sci + sst;
+        report.average = (report.total / 4).toFixed(1);
+
+        if (['P.4', 'P.5', 'P.6', 'P.7'].includes(stuRec.sClass)) {
+          report.aggregates = calculateGrade(math).agg + calculateGrade(eng).agg + calculateGrade(sci).agg + calculateGrade(sst).agg;
+        }
+      }
+
+      db.reports.push(report);
+
+      const classReports = db.reports.filter(r => r.sClass === stuRec.sClass && r.termStage === termStage);
+      classReports.sort((a, b) => b.total - a.total);
+      
+      db.reports.forEach(r => {
+        if(r.sClass === stuRec.sClass && r.termStage === termStage) {
+          r.position = classReports.findIndex(cr => cr.total === r.total) + 1;
+        }
+      });
+
+      saveData();
+      alert(`Report Card published for ${report.name}!`);
+      e.target.reset();
+    }
+
+    function handleUploadNotes(e) {
+      e.preventDefault();
+      const note = {
+        title: document.getElementById('note-title').value,
+        sClass: document.getElementById('note-class').value,
+        details: document.getElementById('note-details').value,
+        uploader: currentUser ? currentUser.name : 'Teacher'
+      };
+
+      db.notes.push(note);
+      saveData();
+      alert('Notes uploaded successfully into storage!');
+      e.target.reset();
+      tempUploadedMaterial = "";
+    }
+
+    function handleNurseryUploadNotes(e) {
+      e.preventDefault();
+      const note = {
+        title: document.getElementById('nur-note-title').value,
+        sClass: document.getElementById('nur-note-class').value,
+        details: document.getElementById('nur-note-details').value,
+        uploader: currentUser ? currentUser.name : 'Nursery Caregiver'
+      };
+
+      db.notes.push(note);
+      saveData();
+      alert('Nursery Activity saved to storage!');
+      e.target.reset();
+    }
+
+    function renderTeacherStorageMaterials() {
+      const tbody = document.getElementById('tch-storage-materials-tbody');
+      if(!tbody) return;
+      tbody.innerHTML = '';
+      if(db.notes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No materials uploaded in storage yet.</td></tr>';
+        return;
+      }
+
+      db.notes.forEach((n, idx) => {
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${n.title}</strong></td>
+            <td>${n.sClass}</td>
+            <td>${n.details}</td>
+            <td><button class="btn btn-danger" style="padding:4px 8px; font-size:0.8rem;" onclick="deleteMaterial(${idx})">Delete</button></td>
+          </tr>
+        `;
+      });
+    }
+
+    function deleteMaterial(idx) {
+      if(confirm('Remove this document from storage?')) {
+        db.notes.splice(idx, 1);
+        saveData();
+      }
+    }
+
+    function loadStudentPortalData() {
+      if (!currentUser || currentUser.role !== 'Student') return;
+
+      const sName = currentUser.name;
+      const sClass = currentUser.studentClass;
+      const studentRec = db.students.find(s => s.name.toLowerCase() === sName.toLowerCase() && s.sClass === sClass);
+
+      if (studentRec) {
+        document.getElementById('disp-stu-name').innerText = studentRec.name;
+        document.getElementById('disp-stu-class').innerText = `Class: ${studentRec.sClass} (${studentRec.stream})`;
+        document.getElementById('disp-stu-section').innerText = `Section: ${studentRec.section || 'Day'}`;
+        document.getElementById('disp-stu-repdate').innerText = `Reporting Date: ${studentRec.reportingDate || 'N/A'}`;
+        document.getElementById('disp-stu-photo').src = studentRec.photo || "https://via.placeholder.com/100";
+        document.getElementById('disp-stu-parent').innerText = `${studentRec.parentName || '-'} (${studentRec.parentPhone || '-'})`;
+        document.getElementById('disp-stu-location').innerText = studentRec.location || '-';
+        document.getElementById('disp-stu-medical').innerText = studentRec.medical || 'None';
+      }
+
+      const behTbody = document.getElementById('stu-behavior-tbody');
+      behTbody.innerHTML = '';
+      const myBeh = db.behavior.filter(b => b.name.toLowerCase() === sName.toLowerCase() && b.sClass === sClass);
+      myBeh.forEach(b => {
+        behTbody.innerHTML += `<tr><td>${b.date}</td><td>${b.details}</td><td>${b.action}</td><td>${b.recordedBy}</td></tr>`;
+      });
+      if (myBeh.length === 0) behTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No behavior records published.</td></tr>';
+
+      const feeTbody = document.getElementById('stu-fee-tbody');
+      feeTbody.innerHTML = '';
+      const myPayments = db.payments.filter(p => p.name.toLowerCase() === sName.toLowerCase() && p.sClass === sClass);
+      
+      let totalPaid = 0;
+      myPayments.forEach(p => {
+        totalPaid += Number(p.amount);
+        feeTbody.innerHTML += `
+          <tr>
+            <td>${p.receipt}</td>
+            <td>${p.date}</td>
+            <td>${p.type}</td>
+            <td>${formatMoney(p.amount)}</td>
+            <td><span class="badge bg-green">Verified</span></td>
+          </tr>
+        `;
+      });
+
+      const totalFee = studentRec ? studentRec.fee : 0;
+      const balance = totalFee - totalPaid;
+
+      if (myPayments.length === 0) {
+        feeTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No payment records found.</td></tr>';
+      }
+
+      document.getElementById('stu-fee-summary').innerHTML = `
+        <strong>Total Fee:</strong> ${formatMoney(totalFee)} | 
+        <strong>Total Paid:</strong> ${formatMoney(totalPaid)} | 
+        <strong style="color:red;">Balance: ${formatMoney(balance)}</strong>
+      `;
+      document.getElementById('disp-stu-balance').innerText = formatMoney(balance);
+
+      const notesTbody = document.getElementById('stu-notes-tbody');
+      notesTbody.innerHTML = '';
+      const myNotes = db.notes.filter(n => n.sClass === sClass);
+      myNotes.forEach(n => {
+        notesTbody.innerHTML += `<tr><td><strong>${n.title}</strong></td><td>${n.sClass}</td><td>${n.details}</td></tr>`;
+      });
+      if (myNotes.length === 0) notesTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No study materials for your class.</td></tr>';
+
+      const ttTbody = document.getElementById('student-timetable-rows');
+      ttTbody.innerHTML = '';
+      const myTT = db.timetable.filter(t => t.sClass === sClass);
+      myTT.forEach(t => {
+        ttTbody.innerHTML += `<tr><td>${t.type}</td><td>${t.day}</td><td>${t.start} - ${t.end}</td><td>${t.subject}</td><td>${t.venue}</td></tr>`;
+      });
+      if (myTT.length === 0) ttTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No timetable entries published.</td></tr>';
+
+      const attTbody = document.getElementById('stu-attendance-tbody');
+      attTbody.innerHTML = '';
+      const myAtt = db.attendance.filter(a => a.name.toLowerCase() === sName.toLowerCase() && a.sClass === sClass);
+      myAtt.forEach(a => {
+        attTbody.innerHTML += `<tr><td>${a.date}</td><td>${a.sClass}</td><td><span class="badge ${a.status === 'Present' ? 'bg-green' : 'bg-red'}">${a.status}</span></td></tr>`;
+      });
+      if (myAtt.length === 0) attTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No attendance records found.</td></tr>';
+
+      const reportDiv = document.getElementById('student-report-cards-list');
+      reportDiv.innerHTML = '';
+      const myReports = db.reports.filter(r => r.name.toLowerCase() === sName.toLowerCase() && r.sClass === sClass);
+      
+      myReports.forEach(r => {
+        let marksHtml = '';
+        if(r.isNursery) {
+          marksHtml = `<p style="background:#fff8dc; padding:8px; border-radius:4px;"><strong>Nursery Learning Domains:</strong> Numbers: ${r.marks.num}% | Reading: ${r.marks.read}% | General Knowledge: ${r.marks.gk}% | Social Dev: ${r.marks.soc}% | Language Dev: ${r.marks.lang}%</p>`;
+        } else {
+          marksHtml = `<p>Math: ${r.marks.math} (${calculateGrade(r.marks.math).grade}) | Eng: ${r.marks.eng} (${calculateGrade(r.marks.eng).grade}) | Sci: ${r.marks.sci} (${calculateGrade(r.marks.sci).grade}) | SST: ${r.marks.sst} (${calculateGrade(r.marks.sst).grade})</p>`;
+        }
+
+        reportDiv.innerHTML += `
+          <div style="background:#fff; padding:15px; border:1px solid #ccc; border-left:5px solid ${r.isNursery ? '#ff6f61' : 'var(--primary)'}; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong>${r.termStage} ${r.isNursery ? 'Nursery Learning Assessment' : 'Academic Report Card'} - ${r.name} (${r.sClass})</strong>
+              <img src="${r.photo || 'https://via.placeholder.com/100'}" style="width:50px; height:50px; border-radius:4px; object-fit:cover;">
+            </div>
+            ${marksHtml}
+            <p style="margin:4px 0;"><strong>Total Score:</strong> ${r.total} | <strong>Average:</strong> ${r.average}% ${r.aggregates ? '| <strong>Aggregates:</strong> ' + r.aggregates : ''} | <strong>Class Position:</strong> ${r.position || 'N/A'}</p>
+            <p style="margin:4px 0;"><strong>Assessment Grade:</strong> ${r.division} | <strong>Teacher Remarks:</strong> ${r.comment}</p>
+          </div>
+        `;
+      });
+      if (myReports.length === 0) reportDiv.innerHTML = '<p style="text-align:center;">No published report cards available.</p>';
+
+      const noticeDiv = document.getElementById('stu-announcements-list');
+      noticeDiv.innerHTML = '';
+      db.notices.forEach(n => {
+        noticeDiv.innerHTML += `
+          <div style="background:#f8f9fa; border-left:3px solid var(--primary); padding:10px; margin-bottom:8px;">
+            <strong style="color:var(--primary);">${n.title}</strong> <small>(${n.date})</small>
+            <p style="margin:5px 0 0; font-size:0.9rem;">${n.content}</p>
+          </div>
+        `;
+      });
+      if (db.notices.length === 0) noticeDiv.innerHTML = '<p style="color:#666;">No recent school notices.</p>';
+    }
+
+    function updateOverviewStats() {
+      const totalStudents = db.students.length;
+      const expectedFees = db.students.reduce((sum, s) => sum + Number(s.fee), 0);
+      const collectedFees = db.payments.reduce((sum, p) => sum + Number(p.amount), 0);
+      const outstanding = expectedFees - collectedFees;
+
+      document.getElementById('stat-total-students').innerText = `${totalStudents} Learners`;
+      document.getElementById('stat-expected-fees').innerText = formatMoney(expectedFees);
+      document.getElementById('stat-collected-fees').innerText = formatMoney(collectedFees);
+      document.getElementById('stat-outstanding-fees').innerText = formatMoney(outstanding);
+    }
+
+    function togglePrintOptions() {
+      const choice = document.getElementById('sec-print-choice').value;
+      document.getElementById('print-opt-student').style.display = (choice === 'student-statement') ? 'block' : 'none';
+      document.getElementById('print-opt-class').style.display = (choice === 'rollcall-summary') ? 'block' : 'none';
+    }
+
+    function executeSecretaryPrint() {
+      const choice = document.getElementById('sec-print-choice').value;
+
+      if (choice === 'defaulters') {
+        printDefaultersList();
+      } else if (choice === 'student-statement') {
+        const val = document.getElementById('sec-print-student-select').value;
+        const studentRec = db.students.find(s => `${s.name} (${s.sClass})` === val);
+        if (!studentRec) {
+          alert('Please select a student from the drop-down list!');
+          return;
+        }
+        printStudentStatement(studentRec.name, studentRec.sClass);
+      } else if (choice === 'full-student-list') {
+        printFullStudentDirectory();
+      } else if (choice === 'rollcall-summary') {
+        const cls = document.getElementById('sec-print-class-select').value;
+        printClassRegister(cls);
+      } else if (choice === 'financial-summary') {
+        printFinancialSummary();
+      }
+    }
+
+    function preparePrintHeader(title) {
+      return `
+        <div class="print-header">
+          <h1>WASHINGTON JUNIOR SCHOOL</h1>
+          <p>whatsapp/phone number +256743455636 | email – washingtonjuniorschool@gmail.com | location Nkokonjeru Town Council</p>
+          <p><strong>OFFICIAL SECRETARY REPORT: ${title.toUpperCase()}</strong></p>
+          <p>Date Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}</p>
+        </div>
+      `;
+    }
+
+    function triggerPrint(htmlContent) {
+      const container = document.getElementById('printable-area');
+      container.innerHTML = htmlContent;
+      window.print();
+    }
+
+    function printDefaultersList() {
+      let html = preparePrintHeader('Fee Defaulters & Outstanding Balances');
+      html += `
+        <table>
+          <thead>
+            <tr><th>Student Name</th><th>Class</th><th>Total Fee</th><th>Paid</th><th>Outstanding Balance</th></tr>
+          </thead>
+          <tbody>
+      `;
+      let count = 0;
+      db.students.forEach(s => {
+        const paid = db.payments.filter(p => p.name.toLowerCase() === s.name.toLowerCase() && p.sClass === s.sClass).reduce((sum, p) => sum + Number(p.amount), 0);
+        const bal = s.fee - paid;
+        if (bal > 0) {
+          count++;
+          html += `<tr><td>${s.name}</td><td>${s.sClass} (${s.stream})</td><td>${formatMoney(s.fee)}</td><td>${formatMoney(paid)}</td><td style="color:red; font-weight:bold;">${formatMoney(bal)}</td></tr>`;
+        }
+      });
+
+      if (count === 0) {
+        html += `<tr><td colspan="5" style="text-align:center;">No fee defaulters found! All students are fully paid.</td></tr>`;
+      }
+      html += `</tbody></table>`;
+      triggerPrint(html);
+    }
+
+    function printStudentStatement(studentName, studentClass) {
+      const student = db.students.find(s => s.name.toLowerCase() === studentName.toLowerCase() && s.sClass === studentClass);
+      const payments = db.payments.filter(p => p.name.toLowerCase() === studentName.toLowerCase() && p.sClass === studentClass);
+
+      let totalPaid = payments.reduce((sum, p) => sum + Number(p.amount), 0);
+      let totalFee = student ? student.fee : 0;
+      let balance = totalFee - totalPaid;
+
+      let html = preparePrintHeader(`Official Fee Statement - ${studentName}`);
+      html += `
+        <p><strong>Student Name:</strong> ${studentName} | <strong>Class:</strong> ${student ? student.sClass + ' (' + student.stream + ')' : 'N/A'}</p>
+        <table>
+          <thead><tr><th>Receipt No</th><th>Date</th><th>Type</th><th>Amount Paid</th></tr></thead>
+          <tbody>
+      `;
+
+      payments.forEach(p => {
+        html += `<tr><td>${p.receipt}</td><td>${p.date}</td><td>${p.type}</td><td>${formatMoney(p.amount)}</td></tr>`;
+      });
+
+      if (payments.length === 0) {
+        html += `<tr><td colspan="4" style="text-align:center;">No payment transactions recorded.</td></tr>`;
+      }
+
+      html += `
+          </tbody>
+        </table>
+        <div style="margin-top:20px; font-size:1.1rem;">
+          <p><strong>Total Agreed Term Fee:</strong> ${formatMoney(totalFee)}</p>
+          <p><strong>Total Fees Paid:</strong> ${formatMoney(totalPaid)}</p>
+          <p style="color:red; font-weight:bold;"><strong>Remaining Balance:</strong> ${formatMoney(balance)}</p>
+        </div>
+      `;
+
+      triggerPrint(html);
+    }
+
+    function printFullStudentDirectory() {
+      let html = preparePrintHeader('Full Registered Students Directory');
+      html += `
+        <table>
+          <thead><tr><th>#</th><th>Student Name</th><th>Class & Stream</th><th>Section</th><th>Agreed Fee</th></tr></thead>
+          <tbody>
+      `;
+      db.students.forEach((s, idx) => {
+        html += `<tr><td>${idx + 1}</td><td>${s.name}</td><td>${s.sClass} (${s.stream})</td><td>${s.section || 'Day'}</td><td>${formatMoney(s.fee)}</td></tr>`;
+      });
+      if (db.students.length === 0) html += `<tr><td colspan="5" style="text-align:center;">No students registered.</td></tr>`;
+      html += `</tbody></table>`;
+      triggerPrint(html);
+    }
+
+    function printClassRegister(className) {
+      const cls = className || document.getElementById('rollcall-class-select').value || 'P.1';
+      const students = db.students.filter(s => s.sClass === cls);
+
+      let html = preparePrintHeader(`Class Attendance Register - ${cls}`);
+      html += `
+        <table>
+          <thead><tr><th>#</th><th>Student Name</th><th>Stream</th><th>Signature / Status</th></tr></thead>
+          <tbody>
+      `;
+      students.forEach((s, idx) => {
+        html += `<tr><td>${idx + 1}</td><td>${s.name}</td><td>${s.stream}</td><td>[   ] Present  [   ] Absent</td></tr>`;
+      });
+      if (students.length === 0) html += `<tr><td colspan="4" style="text-align:center;">No students registered in ${cls}.</td></tr>`;
+      html += `</tbody></table>`;
+      triggerPrint(html);
+    }
+
+    function printFinancialSummary() {
+      const totalStudents = db.students.length;
+      const expectedFees = db.students.reduce((sum, s) => sum + Number(s.fee), 0);
+      const collectedFees = db.payments.reduce((sum, p) => sum + Number(p.amount), 0);
+      const outstanding = expectedFees - collectedFees;
+
+      let html = preparePrintHeader('School Financial Overview Report');
+      html += `
+        <div style="font-size: 1.1rem; line-height: 1.8;">
+          <p><strong>Total Enrolled Students:</strong> ${totalStudents}</p>
+          <p><strong>Total Expected Tuition Fees:</strong> ${formatMoney(expectedFees)}</p>
+          <p><strong>Total Fees Collected to Date:</strong> ${formatMoney(collectedFees)}</p>
+          <p><strong>Total Outstanding Defaulter Balance:</strong> ${formatMoney(outstanding)}</p>
+        </div>
+      `;
+      triggerPrint(html);
+    }
+
+    function printSingleReceipt(pay) {
+      let html = preparePrintHeader(`OFFICIAL CASH PAYMENT RECEIPT - ${pay.receipt}`);
+      html += `
+        <div style="border: 2px dashed #003366; padding: 20px; border-radius: 8px; margin-top: 20px;">
+          <p><strong>Receipt Number:</strong> ${pay.receipt}</p>
+          <p><strong>Received From:</strong> ${pay.name} (${pay.sClass})</p>
+          <p><strong>Payment Category:</strong> ${pay.type}</p>
+          <p><strong>Amount Paid:</strong> ${formatMoney(pay.amount)}</p>
+          <p><strong>Date Paid:</strong> ${pay.date}</p>
+          <br>
+          <p><strong>Secretary / Bursar Signature:</strong> ______________________</p>
+        </div>
+      `;
+      triggerPrint(html);
+    }
+
+    window.onload = function() {
+      populateStudentDropdowns();
+      updateOverviewStats();
+    };
+  </script>
+</body>
+</html>
